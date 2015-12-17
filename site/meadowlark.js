@@ -13,6 +13,11 @@ app.set('view engine', 'hbs');
 app.set('port', process.env.PORT || 3000);
 
 
+app.use(function (req, res, next) {
+    res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1';
+    next();
+});
+
 app.use(express.static(__dirname + '/public'));
 
 
@@ -29,7 +34,10 @@ app.get('/about', function (req, res) {
         "Whenever possible, keep it simple."
     ];
     var randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-    res.render('about', {fortune: randomFortune});
+    res.render('about', {
+        fortune: randomFortune,
+        pageTestScript: '/qa/tests-about.js'
+    });
 });
 
 // 定制 404 页面
