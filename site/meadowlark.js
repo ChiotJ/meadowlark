@@ -2,6 +2,7 @@
  * Created by jian_ on 2015/12/8.
  */
 var express = require('express');
+var fortune = require('./lib/fortune');
 var app = express();
 
 // 设置 handlebars 视图引擎
@@ -26,16 +27,8 @@ app.get('/', function (req, res) {
 });
 
 app.get('/about', function (req, res) {
-    var fortunes = [
-        "Conquer your fears or they will conquer you.",
-        "Rivers need springs.",
-        "Do not fear what you don't know.",
-        "You will have a pleasant surprise.",
-        "Whenever possible, keep it simple."
-    ];
-    var randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
     res.render('about', {
-        fortune: randomFortune,
+        fortune: fortune.getFortune(),
         pageTestScript: '/qa/tests-about.js'
     });
 });
