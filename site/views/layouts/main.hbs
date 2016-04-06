@@ -2,10 +2,10 @@
 <html>
 <head>
     <title>Meadowlark Travel</title>
+    {{{_sections.head}}}
     {{#if showTests}}
         <link rel="stylesheet" href="/vendor/mocha.css">
     {{/if}}
-    <script src="/lib/jquery-2.0.2.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -14,12 +14,13 @@
     </style>
 </head>
 <body>
-<header>
-    <img src="/img/logo.png" alt="Meadowlark Travel Logo">
+<header style="background-color: #000000;text-align: center">
+    <img src="/img/logo.png" alt="Meadowlark Travel Logo" width="200px">
 </header>
 {{{body}}}
 
-
+<script src="/lib/jquery-2.0.2.min.js"></script>
+{{{_sections.jquery}}}
 {{#if showTests}}
     <div id="mocha"></div>
     <script src="/vendor/mocha.js"></script>
@@ -38,3 +39,4 @@
 {{/if}}
 </body>
 </html>
+

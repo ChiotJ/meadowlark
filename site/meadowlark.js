@@ -7,9 +7,22 @@ var app = express();
 
 // 设置 handlebars 视图引擎
 var handlebars = require('express3-handlebars')
-    .create({defaultLayout: 'main.hbs'});
+    .create(
+        {
+            defaultLayout: 'main',
+            extname: '.hbs',
+            helpers: {
+                section: function (name, options) {
+                    if (!this._sections)
+                        this._sections = {};
+                    this._sections[name] = options.fn(this);
+                    return null;
+                }
+            }
+        });
 app.engine('hbs', handlebars.engine);
 app.set('view engine', 'hbs');
+
 
 app.set('port', process.env.PORT || 3000);
 
@@ -20,6 +33,38 @@ app.use(function (req, res, next) {
 });
 
 app.use(express.static(__dirname + '/public'));
+
+
+function getWeatherData() {
+    return {
+        locations: [{
+            name: 'Portland',
+            forecastUrl: 'http://www.wunderground.com/US/OR/Portland.html',
+            iconUrl: 'http://icons-ak.wxug.com/i/c/k/cloudy.gif',
+            weather: 'Overcast',
+            temp: '54.1 F (12.3 C)'
+        }, {
+            name: 'Bend',
+            forecastUrl: 'http://www.wunderground.com/US/OR/Bend.html',
+            iconUrl: 'http://icons-ak.wxug.com/i/c/k/partlycloudy.gif',
+            weather: 'Partly Cloudy',
+            temp: '55.0 F (12.8 C)'
+        }, {
+            name: 'Manzanita',
+            forecastUrl: 'http://www.wunderground.com/US/OR/Manzanita.html',
+            iconUrl: 'http://icons-ak.wxug.com/i/c/k/rain.gif',
+            weather: 'Light Rain',
+            temp: '55.0 F (12.8 C)'
+        }]
+    };
+}
+
+app.use(function (req, res, next) {
+    if (!res.locals.partials)
+        res.locals.partials = {};
+    res.locals.partials.weather = getWeatherData();
+    next();
+});
 
 
 app.get('/', function (req, res) {
@@ -39,6 +84,23 @@ app.get('/tours/hood-river', function (req, res) {
 
 app.get('/tours/request-group-rate', function (req, res) {
     res.render('tours/request-group-rate');
+});
+
+app.get('/jquerytest', function (req, res) {
+    res.render('jquerytest');
+});
+
+app.get('/nursery-rhyme', function (req, res) {
+    res.render('nursery-rhyme');
+});
+
+app.get('/data/nursery-rhyme', function (req, res) {
+    res.json({
+        animal: 'squirrel',
+        bodyPart: 'tail',
+        adjective: 'bushy',
+        noun: 'heck'
+    });
 });
 
 // 定制 404 页面
