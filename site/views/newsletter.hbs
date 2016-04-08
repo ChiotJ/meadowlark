@@ -1,5 +1,5 @@
-<h2>Sign up for our newsletter to receive news and specials!</h2>
-<!--<form class="form-horizontal" role="form" action="/process?form=newsletter" method="POST">
+<!--<h2>Sign up for our newsletter to receive news and specials!</h2>
+<form class="form-horizontal" role="form" action="/process?form=newsletter" method="POST">
     <input type="hidden" name="_csrf" value="{{csrf}}">
     <div class="form-group">
         <label for="fieldName" class="col-sm-2 control-label">Name</label>
@@ -20,7 +20,7 @@
 </form>-->
 
 
-<div class="formContainer">
+<!--<div class="formContainer">
     <form class="form-horizontal newsletterForm" role="form" action="/process?form=newsletter" method="POST">
         <input type="hidden" name="_csrf" value="{{csrf}}">
         <div class="form-group">
@@ -40,27 +40,55 @@
             </div>
         </div>
     </form>
-</div>
+</div>-->
 {{#section 'jquery'}}
-    <script> $(document).ready(function () {
-        $('.newsletterForm').on('submit', function (evt) {
-            evt.preventDefault();
-            var action = $(this).attr('action');
-            var $container = $(this).closest('.formContainer');
-            $.ajax({
-                url: action,
-                type: 'POST',
-                success: function (data) {
-                    if (data.success) {
-                        $container.html('<h2>Thank you!</h2>');
-                    } else {
+    <script>
+        /*$(document).ready(function () {
+            $('.newsletterForm').on('submit', function (evt) {
+                evt.preventDefault();
+                var action = $(this).attr('action');
+                var $container = $(this).closest('.formContainer');
+                $.ajax({
+                    url: action,
+                    type: 'POST',
+                    success: function (data) {
+                        if (data.success) {
+                            $container.html('<h2>Thank you!</h2>');
+                        } else {
+                            $container.html('There was a problem.');
+                        }
+                    }, error: function () {
                         $container.html('There was a problem.');
                     }
-                }, error: function () {
-                    $container.html('There was a problem.');
-                }
+                });
             });
-        });
-    });
+        });*/
     </script>
 {{/section}}
+
+
+
+<div class="formContainer">
+    <form class="form-horizontal newsletterForm" role="form"
+          action="/newsletter" method="POST">
+        <div class="form-group">
+            <label for="fieldName" class="col-sm-2 control-label">Name</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control"
+                       id="fieldName" name="name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fieldEmail" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-4">
+                <input type="email" class="form-control" required
+                       id="fieldEmail" name="email">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" class="btn btn-default">Register</button>
+            </div>
+        </div>
+    </form>
+</div>

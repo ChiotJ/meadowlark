@@ -2,10 +2,13 @@
  * Created by jian_ on 2015/12/8.
  */
 var express = require('express');
-var fortune = require('./lib/fortune');
 var bodyParser = require('body-parser');
 var formidable = require('formidable');
 var jqupload = require('jquery-file-upload-middleware');
+
+
+var fortune = require('./lib/fortune');
+var credentials = require('./lib/credentials');
 
 var app = express();
 
@@ -30,16 +33,22 @@ app.set('view engine', 'hbs');
 
 app.set('port', process.env.PORT || 3000);
 
-
-app.use(function (req, res, next) {
-    res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1';
-    next();
-});
+app.use(require('cookie-parser')(credentials.cookieSecret));
+app.use(require('express-session')({
+    resave: false,
+    saveUninitialized: false,
+    secret: credentials.cookieSecret
+}));
 
 app.use(express.static(__dirname + '/public'));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+app.use(function (req, res, next) {
+    res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1';
+    next();
+});
 
 
 function getWeatherData() {
@@ -109,6 +118,9 @@ app.get('/data/nursery-rhyme', function (req, res) {
         noun: 'heck'
     });
 });
+app.get('/thank-you', function (req, res) {
+    res.render('thank-you');
+});
 
 app.get('/newsletter', function (req, res) {
     // 我们会在后面学到 CSRF......目前，只提供一个虚拟值
@@ -157,6 +169,66 @@ app.use('/upload', function (req, res, next) {
         }
     })(req, res, next);
 });
+
+
+app.use(function (req, res, next) {
+    // 如果有即显消息，把它传到上下文中，然后清除它
+    res.locals.flash = req.session.flash;
+    delete req.session.flash;
+    next();
+});
+
+
+// for now, we're mocking NewsletterSignup:
+function NewsletterSignup() {
+}
+NewsletterSignup.prototype.save = function (cb) {
+    cb();
+};
+
+var VALID_EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+
+app.post('/newsletter', function (req, res) {
+    var name = req.body.name || '', email = req.body.email || '';
+    // 输入验证
+    if (!email.match(VALID_EMAIL_REGEX)) {
+        console.log(req.xhr)
+        if (req.xhr)
+            return res.json({error: 'Invalid name email address.'});
+        req.session.flash = {
+            type: 'danger',
+            intro: 'Validation error!',
+            message: 'The email address you entered was not valid.',
+        };
+        return res.redirect(303, '/newsletter/archive');
+    }
+    new NewsletterSignup({name: name, email: email}).save(function (err) {
+        if (err) {
+            if (req.xhr)
+                return res.json({error: 'Database error.'});
+            req.session.flash = {
+                type: 'danger',
+                intro: 'Database error!',
+                message: 'There was a database error; please try again later.',
+            };
+            return res.redirect(303, '/newsletter/archive');
+        }
+        if (req.xhr)
+            return res.json({success: true});
+        req.session.flash = {
+            type: 'success',
+            intro: 'Thank you!',
+            message: 'You have now been signed up for the newsletter.',
+        };
+        return res.redirect(303, '/newsletter/archive');
+    });
+});
+
+app.get('/newsletter/archive', function (req, res) {
+    res.render('newsletter/archive');
+});
+
 
 // 定制 404 页面
 app.use(function (req, res) {
