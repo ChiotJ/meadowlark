@@ -193,13 +193,12 @@ app.post('/newsletter', function (req, res) {
     var name = req.body.name || '', email = req.body.email || '';
     // 输入验证
     if (!email.match(VALID_EMAIL_REGEX)) {
-        console.log(req.xhr)
         if (req.xhr)
             return res.json({error: 'Invalid name email address.'});
         req.session.flash = {
             type: 'danger',
             intro: 'Validation error!',
-            message: 'The email address you entered was not valid.',
+            message: 'The email address you entered was not valid.'
         };
         return res.redirect(303, '/newsletter/archive');
     }
@@ -210,7 +209,7 @@ app.post('/newsletter', function (req, res) {
             req.session.flash = {
                 type: 'danger',
                 intro: 'Database error!',
-                message: 'There was a database error; please try again later.',
+                message: 'There was a database error; please try again later.'
             };
             return res.redirect(303, '/newsletter/archive');
         }
@@ -219,7 +218,7 @@ app.post('/newsletter', function (req, res) {
         req.session.flash = {
             type: 'success',
             intro: 'Thank you!',
-            message: 'You have now been signed up for the newsletter.',
+            message: 'You have now been signed up for the newsletter.'
         };
         return res.redirect(303, '/newsletter/archive');
     });
@@ -227,6 +226,36 @@ app.post('/newsletter', function (req, res) {
 
 app.get('/newsletter/archive', function (req, res) {
     res.render('newsletter/archive');
+});
+
+
+var nodemailer = require('nodemailer');
+var mailTransport = nodemailer.createTransport({
+    host: 'smtp.qq.com',
+    port: 465,
+    secure: true, // use SSL
+    auth: {
+        user: credentials.qq.user,
+        pass: credentials.qq.password
+    }
+});
+
+mailTransport.verify(function (error, success) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log('Server is ready to take our messages');
+
+        mailTransport.sendMail({
+            from: '"Chiot" <228931518@qq.com>',
+            to: 'jianyingshuo@gehua.cc',
+            subject: 'Your Meadowlark Travel Tour',
+            text: 'Thank you for booking your trip with Meadowlark Travel.' + 'We look forward to your visit!'
+        }, function (err) {
+            if (err)
+                console.error('Unable to send email: ' + err);
+        });
+    }
 });
 
 
